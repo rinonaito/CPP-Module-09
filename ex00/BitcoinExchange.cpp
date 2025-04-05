@@ -32,34 +32,43 @@ void BitcoinExchange::updateRateDb(){
 		std::getline(line_stream, date, ',');
 		std::getline(line_stream, rate);
 		
-		rate_db_.insert(std::make_pair(date, stof(rate)));	
+		rate_db_.insert(std::make_pair(date, atof(rate.c_str())));	
 	}	
 }
 
-static std::tm parseDate(const std::string& dateStr) {
-	std::tm tm = {};
-	std::istringstream ss(dateStr);
-	ss >> std::get_time(&tm, "%Y-%m-%d");
-	tm.tm_hour = 0; tm.tm_min = 0; tm.tm_sec = 0;
-	return tm;
+static bool parseDate(const std::string& dateStr, tm &tm_original) {
+    int year, month, day;
+    if (sscanf(dateStr.c_str(), "%d-%d-%d", &year, &month, &day) != 3) {
+        return false; // パース失敗
+    }
+
+    tm_original = tm();  // 初期化
+    tm_original.tm_year = year - 1900;  // tm_year は1900年からの年数
+    tm_original.tm_mon = month - 1;     // tm_mon は 0〜11
+    tm_original.tm_mday = day;
+
+    return true;
 }
 
-static std::string formatDate(const std::tm& timeStruct) {
-	std::ostringstream oss;
-	oss << std::put_time(&timeStruct, "%Y-%m-%d");
-	return oss.str();
+static std::string formatDate(const tm& tm) {
+    char buffer[11]; // "YYYY-MM-DD" + null文字
+    snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", 
+             tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    return std::string(buffer);
 }
 
 std::map<std::string, float>::const_iterator BitcoinExchange::findClosestDate(const std::string date) const{
-	std::tm target_tm = parseDate(date);
+	tm tm_original;
+	if (!parseDate(date, tm_original))
+		std::runtime_error("[Error]invalid date format");
 	size_t count_prev = 0;
-	std::tm tm_prev;
-	for (tm_prev = target_tm; this->rate_db_.find(formatDate(tm_prev)) == this->rate_db_.end(); tm_prev.tm_mday -= 1){
+	tm tm_prev;
+	for (tm_prev = tm_original; this->rate_db_.find(formatDate(tm_prev)) == this->rate_db_.end(); tm_prev.tm_mday -= 1){
 		count_prev++;
 	}
 	size_t count_next = 0;
-	std::tm tm_next;
-	for (tm_next = target_tm; this->rate_db_.find(formatDate(tm_next)) == this->rate_db_.end(); tm_next.tm_mday += 1){
+	tm tm_next;
+	for (tm_next = tm_original; this->rate_db_.find(formatDate(tm_next)) == this->rate_db_.end(); tm_next.tm_mday += 1){
 		count_next++;
 	}
 	return count_next > count_prev ?
@@ -89,7 +98,7 @@ void BitcoinExchange::printExchangeResult() const{
 		{
 			if (price_str.empty())
 				throw std::runtime_error("Error: bad input => " + date);
-			float price = stof(price_str);
+			float price = atof(price_str.c_str());
 			if (price < 0)
 				throw std::runtime_error("Error: not a positive number.");
 			if (price > 1000)
