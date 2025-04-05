@@ -31,55 +31,59 @@ void BitcoinExchange::updateRateDb(){
 		std::string date, rate;
 		std::getline(line_stream, date, ',');
 		std::getline(line_stream, rate);
-		
 		rate_db_.insert(std::make_pair(date, atof(rate.c_str())));	
 	}	
 }
 
+static bool isLeapYear(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
 static bool parseDate(const std::string& dateStr, tm &tm_original) {
-    int year, month, day;
-    if (sscanf(dateStr.c_str(), "%d-%d-%d", &year, &month, &day) != 3) {
-        return false; // パース失敗
-    }
-
-    tm_original = tm();  // 初期化
-    tm_original.tm_year = year - 1900;  // tm_year は1900年からの年数
-    tm_original.tm_mon = month - 1;     // tm_mon は 0〜11
-    tm_original.tm_mday = day;
-
-    return true;
+	int year, month, day;
+	if (sscanf(dateStr.c_str(), "%d-%d-%d", &year, &month, &day) != 3)
+	  return false;
+	if (month < 1 || month > 12)
+		throw std::runtime_error("Error: date does not exist.");
+	int last_day[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 31, 31};
+	if (month == 2 && isLeapYear(year))
+		last_day[month - 1] = 29;
+	if (day < 0 || day > last_day[month - 1])
+		throw std::runtime_error("Error: date does not exist.");
+	tm_original = tm();
+	tm_original.tm_year = year - 1900;
+	tm_original.tm_mon = month - 1;
+	tm_original.tm_mday = day;
+	return true;
 }
 
 static std::string formatDate(const tm& tm) {
-    char buffer[11]; // "YYYY-MM-DD" + null文字
-    snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", 
-             tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-    return std::string(buffer);
+	char buffer[11];
+	snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+	return std::string(buffer);
 }
 
 std::map<std::string, float>::const_iterator BitcoinExchange::findClosestDate(const std::string date) const{
 	tm tm_original;
 	if (!parseDate(date, tm_original))
-		std::runtime_error("[Error]invalid date format");
-	size_t count_prev = 0;
-	tm tm_prev;
-	for (tm_prev = tm_original; this->rate_db_.find(formatDate(tm_prev)) == this->rate_db_.end(); tm_prev.tm_mday -= 1){
-		count_prev++;
+		throw std::runtime_error("Error: invalid date format.");
+	tm tm_prev = tm_original;
+	while (1) {
+		if (this->rate_db_.find(formatDate(tm_prev)) != this->rate_db_.end())
+			break;
+		if (date < this->rate_db_.begin()->first)
+			throw std::runtime_error("Error: date is before the earliest available rate.");
+		tm_prev.tm_mday -= 1;
+		mktime(&tm_prev);
 	}
-	size_t count_next = 0;
-	tm tm_next;
-	for (tm_next = tm_original; this->rate_db_.find(formatDate(tm_next)) == this->rate_db_.end(); tm_next.tm_mday += 1){
-		count_next++;
-	}
-	return count_next > count_prev ?
-		this->rate_db_.find(formatDate(tm_prev)) : this->rate_db_.find(formatDate(tm_next));
+	return this->rate_db_.find(formatDate(tm_prev));
 }
 
 void BitcoinExchange::printLine(const std::string date, const float price) const{
 	std::map<std::string, float>::const_iterator it = this->rate_db_.find(date);
 	if (it == this->rate_db_.end())
 		it = findClosestDate(date);
-	std::cout << date << " => " << price << " = "<< price * it->second << std::endl;
+	std::cout << it->first << " => " << price << " = "<< price * it->second << std::endl;
 }
 
 void BitcoinExchange::printExchangeResult() const{
