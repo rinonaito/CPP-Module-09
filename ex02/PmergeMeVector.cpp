@@ -66,7 +66,6 @@ void PmergeMe::mergeVector(std::vector<std::pair<int, int> >&elements, int start
 		start_index++;
 		right_index++;
 	}
-	
 }
 
 void PmergeMe::mergeSortVector(std::vector<std::pair<int, int> >&elements, int start_index, int end_index){
