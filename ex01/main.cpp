@@ -6,7 +6,7 @@ int main(int argc, char **argv){
 		return 1;
 	}
 	std::string expression = argv[1];
-	if (expression.front() == '"' && expression.back() == '"')
+	if (expression[0] == '"' && expression[expression.size() - 1] == '"')
 		expression.substr(1, expression.size() - 2);
 	try
 	{
