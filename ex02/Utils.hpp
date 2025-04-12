@@ -1,0 +1,15 @@
+#pragma once
+
+#include <iostream>
+
+template <typename T>
+void printElements(const T& elements){
+	for (typename T::const_iterator it = elements.begin();
+		it != elements.end(); it++){
+		std::cout << *it << " ";
+	}
+	std::cout << "\n";
+}
+
+
+

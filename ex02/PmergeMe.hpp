@@ -4,8 +4,11 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <cstdlib>
+#include "Utils.hpp"
 
 class PmergeMe{
+
 	public:
 		PmergeMe();
 		PmergeMe(const PmergeMe &other);
