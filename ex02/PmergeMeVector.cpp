@@ -36,7 +36,7 @@ std::vector<std::pair<int, int> > PmergeMe::initPairVector(){
 		pair_vector_.push_back(std::make_pair(left, right));
 		index += 2;
 	}
-	// the last unpaired element is is treated as a smaller one
+	// the last unpaired element is treated as a smaller one
 	if (index < element_size){
 		int last = this->elements_vector_.at(index);
 		pair_vector_.push_back(std::make_pair(DUMMY_ELEMENT, last));
@@ -99,7 +99,7 @@ static int binarySearch(std::vector<int> array, int target, int begin, int end)
 		return mid;
 }
 
-static std::vector<int> getInsertOrder(std::vector<int> insertable)
+static std::vector<int> getInsertIndexInOrder(std::vector<int> insertable)
 {
 	std::vector<int> target_index;
 	if (insertable.empty())
@@ -148,21 +148,13 @@ void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
 		insertable.push_back(elements.at(0).second);
 	if (insertable.empty())
 		return ;
-	std::vector<int> insert_target_index = getInsertOrder(insertable);
-	///debug
-	std::cout << "target_index: ";
-	printElements(insert_target_index);
-	std::cout << "SORTED: ";
-	printElements(this->sorted_vector_);
-	std::cout << "INSERTABLE: ";
-	printElements(insertable);
-	////
+	std::vector<int> insert_index_in_order = getInsertIndexInOrder(insertable);
 	int add_count = 0;
-	for (std::vector<int>::iterator target_index_it = insert_target_index.begin();
-		target_index_it < insert_target_index.end(); target_index_it++)
+	for (std::vector<int>::iterator index_it = insert_index_in_order.begin();
+		index_it < insert_index_in_order.end(); index_it++)
 	{
-		int target = insertable.at(*target_index_it - 1);
-		int search_end_index = *target_index_it + add_count;
+		int target = insertable.at(*index_it - 1);
+		int search_end_index = *index_it + add_count;
 		int insert_index = binarySearch(this->sorted_vector_, target, 0, search_end_index);
 		this->sorted_vector_.insert(this->sorted_vector_.begin() + insert_index, target);
 		add_count++;
