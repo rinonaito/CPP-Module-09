@@ -11,5 +11,7 @@ void printElements(const T& elements){
 	std::cout << "\n";
 }
 
+int jacobsthal(int index);
+std::vector<int> getJacobsthalIndex(size_t size);
 
 

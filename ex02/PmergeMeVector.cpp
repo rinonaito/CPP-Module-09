@@ -21,7 +21,6 @@ void PmergeMe::initElementsVector(size_t argc, char **argv){
 std::vector<std::pair<int, int> > PmergeMe::initPairVector(){
 	std::vector<std::pair<int, int> > pair_vector_;
 	size_t element_size = this->elements_vector_.size();
-	//size_t pair_size = element_size % 2 == 0 ? element_size / 2 : (element_size / 2) + 1;
 	size_t index = 0;
 	// devide elements into pair
 	while (index + 1 < element_size){
@@ -44,7 +43,7 @@ std::vector<std::pair<int, int> > PmergeMe::initPairVector(){
 	return pair_vector_;
 }
 
-void PmergeMe::mergeVector(std::vector<std::pair<int, int> >&elements, int start_index, int middle_index, int end_index){
+void mergeVector(std::vector<std::pair<int, int> >&elements, int start_index, int middle_index, int end_index){
 	std::vector<std::pair<int, int> > devided_left(elements.begin() + start_index, elements.begin() + middle_index + 1);
 	std::vector<std::pair<int, int> > devided_right(elements.begin() + middle_index + 1, elements.begin() + end_index + 1);
 	size_t left_index = 0;
@@ -80,57 +79,88 @@ void PmergeMe::mergeSortVector(std::vector<std::pair<int, int> >&elements, int s
 	mergeVector(elements, start_index, middle_index, end_index);
 }
 
-static int jacobsthal(int index){
-		if (index == 0)
-			return 0;
-		if (index == 1)
-			return 1;
-		return jacobsthal(index - 1) + 2 * jacobsthal(index - 2);
+static int binarySearch(std::vector<int> array, int target, int begin, int end)
+{
+	int mid;
+	while (begin <= end)
+	{
+		mid = begin + (end - begin) / 2;
+		if (target == array.at(mid))
+			return mid;
+		if (target > array.at(mid))
+			begin = mid + 1;
+		else
+			end = mid - 1;
+	}
+	if (target > array.at(mid))
+		return mid + 1;
+	else
+		return mid;
 }
 
-static std::vector<int> getJacobsthalIndex(size_t size){
-	std::vector<int> jacobsthalIndexVector;
-	size_t current_size = 0;
-	int index = 1;
-	while (current_size < size){
-		int jcobstalIndex = jacobsthal(index);
-		jacobsthalIndexVector.push_back(jcobstalIndex);
-		current_size += jcobstalIndex;
-		index++;
+static std::vector<int> getInsertOrder(std::vector<int> insertable)
+{
+	std::vector<int> target_index;
+	if (insertable.empty())
+		return target_index;
+	std::vector<int> jacobsthal = getJacobsthalIndex(insertable.size());
+	size_t last_pos = 1;
+	size_t target_index_val = 1;
+	for (size_t i = 0; i < jacobsthal.size(); i++)
+	{
+		target_index_val = jacobsthal.at(i);
+		target_index.push_back(target_index_val);
+		for (size_t pos = target_index_val - 1; pos > last_pos; pos--){
+			target_index.push_back(pos);
+		}
+		last_pos = target_index_val;
 	}
-	return jacobsthalIndexVector;
+	while (target_index_val++ < insertable.size())
+		target_index.push_back(target_index_val);
+	return target_index;
 }
 
 void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
-	// smaller one of first pair should locate at the head
-	this->sorted_vector_.push_back(elements.at(0).second);
 	std::vector<int> insertable;
+	size_t first_index_insertable = 0;
 	for (size_t index = 0; index < elements.size(); index++){
+			if(elements.at(index).first == DUMMY_ELEMENT){
+				first_index_insertable = 1;
+				continue;
+			}
+			// smaller one of the first pair should locate at the head
+			if (index == first_index_insertable){
+				this->sorted_vector_.push_back(elements.at(index).second);
+			} else {
+				insertable.push_back(elements.at(index).second);
+			}
 			this->sorted_vector_.push_back(elements.at(index).first);
-			insertable.push_back(elements.at(index).second);
 	}
-	std::vector<int> jacobsthal_indexs = getJacobsthalIndex(insertable.size());
+	// add unpaired element to sorted_vector
+	if (elements.at(0).first == DUMMY_ELEMENT)
+		insertable.push_back(elements.at(0).second);
+	std::vector<int> target_index = getInsertOrder(insertable);
 	///debug
-	std::cout << "JACONBTHAL: ";
-	printElements(jacobsthal_indexs);
+	std::cout << "target_index: ";
+	printElements(target_index);
 	std::cout << "SORTED: ";
 	printElements(this->sorted_vector_);
 	std::cout << "INSERTABLE: ";
 	printElements(insertable);
-	///
-	size_t end_index = 1;
-	for (size_t group_index = 0; group_index < jacobsthal_indexs.size(); group_index++)
+	int add_count = 0;
+	for (std::vector<int>::iterator target_index_it = target_index.begin(); target_index_it < target_index.end(); target_index_it++)
 	{
-		size_t start_index = end_index + (jacobsthal_indexs.at(group_index) * 2);
-		if (start_index > insertable.size())
-			start_index = insertable.size() - 1;
-		for(size_t index = start_index; index >= end_index; index--){
-			// insert into sorted_vector
-			int value = insertable.at(index);
-			std::vector<int>::iterator it = std::lower_bound(sorted_vector_.begin(), sorted_vector_.end(), value);
-			sorted_vector_.insert(it, value);
-		}
-		end_index = start_index + 1;
+		int target = insertable.at(*target_index_it - 1);
+		int search_end_index = *target_index_it + add_count;
+		int insert_index = binarySearch(this->sorted_vector_, target, 0, search_end_index);
+		this->sorted_vector_.insert(this->sorted_vector_.begin() + insert_index, target);
+		add_count++;
+	}
+	if (elements.size() % 2 != 0)
+	{
+		int target = insertable.at(insertable.size() - 1);
+		int insert_index = binarySearch(this->sorted_vector_, target, 0, this->sorted_vector_.size() - 1);
+		this->sorted_vector_.insert(this->sorted_vector_.begin() + insert_index, target);
 	}
 }
 

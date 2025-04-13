@@ -39,8 +39,6 @@ class PmergeMe{
 		void initPairList();
 		void mergeSortVector(std::vector<std::pair<int, int> >&elements, int start_index, int last_index);
 		void mergeSortList(std::list<std::pair<int, int> > &elements, int start_index, int last_index);
-		void mergeVector(std::vector<std::pair<int, int> >&elements, int start_index, int middle_index, int end_index);
-		void mergeList(std::list<std::pair<int, int> > &elements);
 		void insertSortVector(std::vector<std::pair<int, int> >&elements);
 		void insertSortList();
 
