@@ -1,8 +1,7 @@
-#include "PmergeMe.hpp"
-
 /***********************************
 		Vector
 ************************************/
+#include "PmergeMe.hpp"
 
 void PmergeMe::initElementsVector(size_t argc, char **argv){
 	if (argc < 2)
@@ -122,7 +121,6 @@ static std::vector<int> getInsertIndexInOrder(std::vector<int> insertable)
 	{
 		if (std::find(target_index.begin(), target_index.end(), i) == target_index.end())
 			target_index.push_back(i);
-			
 	}
 	return target_index;
 }

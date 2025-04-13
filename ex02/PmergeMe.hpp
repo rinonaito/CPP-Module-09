@@ -43,7 +43,7 @@ class PmergeMe{
 		void initElementsList(size_t argc, char **argv);
 		std::list<std::pair<int, int> > initPairList();
 		void mergeSortList(std::list<std::pair<int, int> > &elements, int start_index, int last_index);
-		void insertSortList(std::vector<std::pair<int, int> >&elements);
+		void insertSortList(std::list<std::pair<int, int> >&elements);
 
 		static const std::string ERROR_MSG_INVALID_PARAM_NUM;
 		static const std::string ERROR_MSG_INVALID_PARAM;
