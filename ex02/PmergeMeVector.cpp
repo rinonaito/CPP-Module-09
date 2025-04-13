@@ -3,6 +3,7 @@
 /***********************************
 		Vector
 ************************************/
+
 void PmergeMe::initElementsVector(size_t argc, char **argv){
 	if (argc < 2)
 		throw std::runtime_error(ERROR_MSG_INVALID_PARAM_NUM);
@@ -105,18 +106,24 @@ static std::vector<int> getInsertOrder(std::vector<int> insertable)
 		return target_index;
 	std::vector<int> jacobsthal = getJacobsthalIndex(insertable.size());
 	size_t last_pos = 1;
-	size_t target_index_val = 1;
 	for (size_t i = 0; i < jacobsthal.size(); i++)
 	{
-		target_index_val = jacobsthal.at(i);
-		target_index.push_back(target_index_val);
-		for (size_t pos = target_index_val - 1; pos > last_pos; pos--){
+		int start_pos = jacobsthal.at(i);
+		if (static_cast<size_t>(start_pos) > insertable.size()){
+			break;
+		}
+		target_index.push_back(start_pos);
+		for (size_t pos = start_pos - 1; pos > last_pos; pos--){
 			target_index.push_back(pos);
 		}
-		last_pos = target_index_val;
+		last_pos = start_pos;
 	}
-	while (target_index_val++ < insertable.size())
-		target_index.push_back(target_index_val);
+	for (int i = insertable.size(); i >= 1; i--)
+	{
+		if (std::find(target_index.begin(), target_index.end(), i) == target_index.end())
+			target_index.push_back(i);
+			
+	}
 	return target_index;
 }
 
@@ -139,16 +146,20 @@ void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
 	// add unpaired element to sorted_vector
 	if (elements.at(0).first == DUMMY_ELEMENT)
 		insertable.push_back(elements.at(0).second);
-	std::vector<int> target_index = getInsertOrder(insertable);
+	if (insertable.empty())
+		return ;
+	std::vector<int> insert_target_index = getInsertOrder(insertable);
 	///debug
 	std::cout << "target_index: ";
-	printElements(target_index);
+	printElements(insert_target_index);
 	std::cout << "SORTED: ";
 	printElements(this->sorted_vector_);
 	std::cout << "INSERTABLE: ";
 	printElements(insertable);
+	////
 	int add_count = 0;
-	for (std::vector<int>::iterator target_index_it = target_index.begin(); target_index_it < target_index.end(); target_index_it++)
+	for (std::vector<int>::iterator target_index_it = insert_target_index.begin();
+		target_index_it < insert_target_index.end(); target_index_it++)
 	{
 		int target = insertable.at(*target_index_it - 1);
 		int search_end_index = *target_index_it + add_count;

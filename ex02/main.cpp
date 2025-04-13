@@ -17,7 +17,7 @@ int	main(int argc, char **argv){
 		clock_t end_vector = clock();
 
 		clock_t start_list = clock();
-		pm.execSortList(argc, argv);
+		//pm.execSortList(argc, argv);
 		clock_t end_list = clock();
 
 		std::cout << "Before: ";

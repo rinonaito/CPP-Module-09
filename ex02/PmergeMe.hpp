@@ -6,6 +6,7 @@
 #include <vector>
 #include <set>
 #include <cstdlib>
+#include <algorithm>
 #include "Utils.hpp"
 
 class PmergeMe{
@@ -28,19 +29,21 @@ class PmergeMe{
 		std::list<int> getSortedList() const;
 
 	private:
+		//Vector
 		std::vector<int> elements_vector_;
-		std::list<int> elements_list_;
 		std::vector<int> sorted_vector_;
-		std::list<int> sorted_list_;
-
 		void initElementsVector(size_t argc, char **argv);
-		void initElementsList(size_t argc, char **argv);
 		std::vector<std::pair<int, int> > initPairVector();
-		void initPairList();
 		void mergeSortVector(std::vector<std::pair<int, int> >&elements, int start_index, int last_index);
-		void mergeSortList(std::list<std::pair<int, int> > &elements, int start_index, int last_index);
 		void insertSortVector(std::vector<std::pair<int, int> >&elements);
-		void insertSortList();
+
+		//List
+		std::list<int> elements_list_;
+		std::list<int> sorted_list_;
+		void initElementsList(size_t argc, char **argv);
+		std::list<std::pair<int, int> > initPairList();
+		void mergeSortList(std::list<std::pair<int, int> > &elements, int start_index, int last_index);
+		void insertSortList(std::vector<std::pair<int, int> >&elements);
 
 		static const std::string ERROR_MSG_INVALID_PARAM_NUM;
 		static const std::string ERROR_MSG_INVALID_PARAM;

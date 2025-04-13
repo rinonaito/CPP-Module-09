@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 
 template <typename T>
 void printElements(const T& elements){

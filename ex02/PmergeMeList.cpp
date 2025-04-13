@@ -14,7 +14,10 @@ void PmergeMe::initElementsList(size_t argc, char **argv){
 	}
 }
 
-void PmergeMe::initPairList(){}
+std::list<std::pair<int, int> > PmergeMe::initPairList(){
+	std::list<std::pair<int, int> >a;
+	return a;
+}
 
 void PmergeMe::mergeSortList(std::list<std::pair<int, int> > &elements, int start_index, int last_index){
 	(void)elements;
@@ -22,11 +25,9 @@ void PmergeMe::mergeSortList(std::list<std::pair<int, int> > &elements, int star
 	(void)last_index;
 }
 
-void PmergeMe::mergeList(std::list<std::pair<int, int> > &elements){
+void PmergeMe::insertSortList(std::vector<std::pair<int, int> >&elements){
 	(void)elements;
 }
-
-void PmergeMe::insertSortList(){}
 
 void PmergeMe::execSortList(int argc, char **argv){
 	this->initElementsList(argc, argv);
