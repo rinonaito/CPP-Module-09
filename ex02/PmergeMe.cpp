@@ -2,6 +2,7 @@
 
 const std::string PmergeMe::ERROR_MSG_INVALID_PARAM_NUM = "Error: invalid number of arguments.";
 const std::string PmergeMe::ERROR_MSG_INVALID_PARAM = "Error: invalid parameter detected.";
+const std::string PmergeMe::ERROR_MSG_PARAM_DUPLICATED = "Error: parameter duplication is not acceptabe.";
 const int PmergeMe::DUMMY_ELEMENT = -1;
 
 PmergeMe::PmergeMe(){}

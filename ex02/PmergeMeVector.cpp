@@ -6,13 +6,16 @@
 void PmergeMe::initElementsVector(size_t argc, char **argv){
 	if (argc < 2)
 		throw std::runtime_error(ERROR_MSG_INVALID_PARAM_NUM);
-	std::seti<int without_duplication;
+	std::set<int> without_duplication;
 	for (size_t index = 1; index < argc; index++){
 		int element = std::atoi(argv[index]);
 		if (element <= 0)
 			throw std::runtime_error(ERROR_MSG_INVALID_PARAM);
 		this->elements_vector_.push_back(element);	
+		without_duplication.insert(element);
 	}
+	if (without_duplication.size() != this->elements_vector_.size())
+		throw std::runtime_error(ERROR_MSG_PARAM_DUPLICATED);
 }
 
 std::vector<std::pair<int, int> > PmergeMe::initPairVector(){

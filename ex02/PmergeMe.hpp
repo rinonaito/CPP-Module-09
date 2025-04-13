@@ -4,6 +4,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <set>
 #include <cstdlib>
 #include "Utils.hpp"
 
@@ -45,5 +46,6 @@ class PmergeMe{
 
 		static const std::string ERROR_MSG_INVALID_PARAM_NUM;
 		static const std::string ERROR_MSG_INVALID_PARAM;
+		static const std::string ERROR_MSG_PARAM_DUPLICATED;
 		static const int DUMMY_ELEMENT;
 };
