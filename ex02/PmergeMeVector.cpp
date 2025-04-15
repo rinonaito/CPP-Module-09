@@ -157,12 +157,6 @@ void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
 		this->sorted_vector_.insert(this->sorted_vector_.begin() + insert_index, target);
 		add_count++;
 	}
-	if (elements.size() % 2 != 0)
-	{
-		int target = insertable.at(insertable.size() - 1);
-		int insert_index = binarySearch(this->sorted_vector_, target, 0, this->sorted_vector_.size() - 1);
-		this->sorted_vector_.insert(this->sorted_vector_.begin() + insert_index, target);
-	}
 }
 
 void PmergeMe::execSortVector(int argc, char **argv){

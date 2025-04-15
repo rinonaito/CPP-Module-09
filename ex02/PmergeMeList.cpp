@@ -131,45 +131,41 @@ static std::list<int> getInsertIndexInOrder(std::list<int> insertable)
 
 void PmergeMe::insertSortList(std::list<std::pair<int, int> >& elements) {
 	std::list<int> insertable;
-	bool found_dummy = false;
+	size_t first_index_insertable = 0;
 	
 	size_t index = 0;
 	for (std::list<std::pair<int, int> >::iterator it = elements.begin(); it != elements.end(); ++it, ++index) {
 		if (it->first == DUMMY_ELEMENT) {
-			found_dummy = true;
+			first_index_insertable = 1;
 			continue;
 		}
-		if (index == (found_dummy ? 1 : 0)) {
+		// smaller one of the first pair should locate at the head
+		if (index == first_index_insertable) {
 			this->sorted_list_.push_back(it->second);
 		} else {
 			insertable.push_back(it->second);
 		}
 		this->sorted_list_.push_back(it->first);
 	}
-	if (found_dummy) {
+	// add unpaired element to sorted vector
+	if (first_index_insertable == 1) {
 		insertable.push_back(elements.front().second);
 	}
-	if (insertable.empty()) return;
+	if (insertable.empty())
+		return;
 	std::list<int> insert_index_in_order = getInsertIndexInOrder(insertable);
 	int add_count = 0;
-	std::list<int>::iterator ins_it = insert_index_in_order.begin();
-	std::list<int>::iterator val_it = insertable.begin();
-	for (; ins_it != insert_index_in_order.end(); ++ins_it, ++val_it) {
-		int target = *val_it;
-		int search_end_index = *ins_it + add_count;
+	for (std::list<int>::iterator index_it = insert_index_in_order.begin(); index_it != insert_index_in_order.end(); index_it++) {
+		int index = *index_it - 1;
+		std::list<int>::iterator insertable_it = insertable.begin();
+		std::advance(insertable_it, index);
+		int target = *insertable_it;
+		int search_end_index = *index_it + add_count;
 		int insert_index = binarySearch(this->sorted_list_, target, 0, search_end_index);
 		std::list<int>::iterator insert_pos = this->sorted_list_.begin();
 		std::advance(insert_pos, insert_index);
 		this->sorted_list_.insert(insert_pos, target);
 		add_count++;
-	}
-	if (elements.size() % 2 != 0 && insertable.size() > insert_index_in_order.size()) {
-		std::list<int>::reverse_iterator last = insertable.rbegin();
-		int target = *last;
-		int insert_index = binarySearch(this->sorted_list_, target, 0, this->sorted_list_.size() - 1);
-		std::list<int>::iterator insert_pos = this->sorted_list_.begin();
-		std::advance(insert_pos, insert_index);
-		this->sorted_list_.insert(insert_pos, target);
 	}
 }
 
