@@ -4,8 +4,6 @@
 #include "PmergeMe.hpp"
 
 void PmergeMe::initElementsList(size_t argc, char **argv){
-	if (argc < 2)
-		throw std::runtime_error(ERROR_MSG_INVALID_PARAM_NUM);
 	for (size_t index = 1; index < argc; index++){
 		int element = std::atoi(argv[index]);
 		if (element <= 0)
@@ -171,6 +169,8 @@ void PmergeMe::insertSortList(std::list<std::pair<int, int> >& elements) {
 
 void PmergeMe::execSortList(int argc, char **argv){
 	this->initElementsList(argc, argv);
+	if (this->elements_list_.empty())
+		throw std::runtime_error(ERROR_MSG_INVALID_PARAM_NUM);
 	if (this->elements_list_.size() == 1){
 		this->sorted_list_ = this->elements_list_;
 		return;

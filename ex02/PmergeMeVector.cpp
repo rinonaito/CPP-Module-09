@@ -4,8 +4,6 @@
 #include "PmergeMe.hpp"
 
 void PmergeMe::initElementsVector(size_t argc, char **argv){
-	if (argc < 2)
-		throw std::runtime_error(ERROR_MSG_INVALID_PARAM_NUM);
 	std::set<int> without_duplication;
 	for (size_t index = 1; index < argc; index++){
 		int element = std::atoi(argv[index]);
@@ -14,8 +12,6 @@ void PmergeMe::initElementsVector(size_t argc, char **argv){
 		this->elements_vector_.push_back(element);	
 		without_duplication.insert(element);
 	}
-	if (without_duplication.size() != this->elements_vector_.size())
-		throw std::runtime_error(ERROR_MSG_PARAM_DUPLICATED);
 }
 
 std::vector<std::pair<int, int> > PmergeMe::initPairVector(){
@@ -26,11 +22,8 @@ std::vector<std::pair<int, int> > PmergeMe::initPairVector(){
 	while (index + 1 < element_size){
 		int left = elements_vector_.at(index);
 		int right = elements_vector_.at(index + 1);
-		if (left < right){
-			int tmp = left;
-			left = right;
-			right = tmp;
-		}
+		if (left < right)
+	            std::swap(left, right);
 		// first: bigger, second: smaller
 		pair_vector_.push_back(std::make_pair(left, right));
 		index += 2;
@@ -161,6 +154,8 @@ void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
 
 void PmergeMe::execSortVector(int argc, char **argv){
 	this->initElementsVector(argc, argv);
+	if (this->elements_vector_.empty())
+		throw std::runtime_error(ERROR_MSG_INVALID_PARAM_NUM);
 	if (this->elements_vector_.size() == 1){
 		this->sorted_vector_ = this->elements_vector_;
 		return;

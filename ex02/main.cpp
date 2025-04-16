@@ -37,7 +37,7 @@ int	main(int argc, char **argv){
 				pm.printListSorted();
 				throw std::runtime_error("Error: result of sort does not match.");
 			}
-			if (prev >= *vec_it){
+			if (prev > *vec_it){
 				throw std::runtime_error("Error: result not sorted property.");
 			}
 			prev = *vec_it;
