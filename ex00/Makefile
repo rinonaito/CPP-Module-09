@@ -4,7 +4,9 @@ CC	= c++
 CFLAGS  = -Wall -Wextra -Werror -std=c++98
 
 SRC_DIR =       src/
-SRCS    =       $(wildcard *.cpp)
+SRCS    =       main.cpp\
+		BitcoinExchange.cpp\
+		DateUtils.cpp
 
 OBJ_DIR = obj/
 OBJS    = ${SRCS:%.cpp=${OBJ_DIR}%.o}
