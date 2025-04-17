@@ -4,7 +4,11 @@ CC	= c++
 CFLAGS  = -Wall -Wextra -Werror -std=c++98
 
 SRC_DIR =       src/
-SRCS    =       $(wildcard *.cpp)
+SRCS    =       main.cpp\
+		PmergeMe.cpp\
+		PmergeMeList.cpp\
+		PmergeMeVector.cpp\
+		Utils.cpp
 
 OBJ_DIR = obj/
 OBJS    = ${SRCS:%.cpp=${OBJ_DIR}%.o}
