@@ -72,6 +72,84 @@ void PmergeMe::mergeSortVector(std::vector<std::pair<int, int> >&elements, int s
 	mergeVector(elements, start_index, middle_index, end_index);
 }
 
+void	PmergeMe::mergeInsertVector(
+			std::vector<std::pair<int, int> >&pair_vector, 
+			std::vector<std::vector<std::pair<int, int> > >& all_vectors){
+	if (pair_vector.size() <= 1)
+		return;
+	std::vector<std::pair<int, int> >for_next_call;
+	for (size_t i = 0; i + 1 < pair_vector.size(); i += 2){
+		int first = std::max(pair_vector[i].first, pair_vector[i + 1].first);
+		int second = std::min(pair_vector[i].first, pair_vector[i + 1].first);
+		if (first != DUMMY_ELEMENT){
+			for_next_call.push_back(std::make_pair(first, second));
+		} else {
+			int remaining = pair_vector[pair_vector.size() - 1].first;
+			if (remaining != DUMMY_ELEMENT)
+				for_next_call.push_back(std::make_pair(DUMMY_ELEMENT, remaining));
+		}
+	}
+	all_vectors.insert(all_vectors.begin(), for_next_call);
+	mergeInsertVector(for_next_call, all_vectors);
+	std::cout << "================================" << std::endl;
+	std::cout << "for all vectors: " << all_vectors.size() << std::endl;
+	for (size_t j = 0; j < all_vectors.size(); j++){
+		std::cout << "vector[" << j << "]" << std::endl;
+		for (size_t i = 0; i < all_vectors[j].size(); i++)
+		{
+			std::cout << " first: " << all_vectors[j][i].first <<
+				" secod: " << all_vectors[j][i].second << std::endl;
+		}
+	}
+	std::vector<std::pair<int, int> > new_element = for_next_call;
+	for (size_t i = 1; i < all_vectors.size(); i++){
+		std::cout << "================================" << std::endl;
+		std::cout << "<< new elements >>" << std::endl;
+		for (size_t i = 0; i < new_element.size(); i++)
+		{
+			std::cout << " first: " << new_element[i].first << " secod: " << new_element[i].second << std::endl;
+		}
+		std::vector<int> sorted = insertSortVector(new_element);
+		new_element.clear();
+		std::cout << "<< sorted >>" << std::endl;
+		printElements(sorted);
+		std::vector<std::pair<int, int> > src = all_vectors[i];
+		std::cout << "<< src >>" << std::endl;
+		for (size_t i = 0; i < src.size(); i++)
+		{
+			std::cout << " first: " << src[i].first << " secod: " << src[i].second << std::endl;
+		}
+		for (size_t i = 0; i < sorted.size(); i++){
+			int first = sorted[i];
+			int second = 0;
+			for (size_t j = 0; j < src.size(); j++){
+				if (src[i].first == first)
+					second = src[i].second;
+			}
+			if (second == 0)
+				throw std::runtime_error("SOMETHING WENT WRONG");
+			new_element.push_back(std::make_pair(first, second));
+		}
+		if (src.size() > sorted.size()){
+			new_element.push_back(src[src.size() - 1]);
+		}
+		std::cout << "<< new elements >>" << std::endl;
+		for (size_t i = 0; i < new_element.size(); i++)
+		{
+			std::cout << " first: " << new_element[i].first << " secod: " << new_element[i].second << std::endl;
+		}
+		std::cout << new_element.size() << std::endl;
+		std::cout <<  all_vectors[all_vectors.size() - 1].size() << std::endl;
+		if (new_element.size() == all_vectors[all_vectors.size() - 1].size()){
+			std::cout << "BREAK; " << std::endl;
+			break;
+
+		}
+	}
+	std::cout << "HERE" << std::endl;
+	pair_vector = new_element;
+}
+
 static int binarySearch(std::vector<int> array, int target, int begin, int end)
 {
 	int mid;
@@ -118,8 +196,9 @@ static std::vector<int> getInsertIndexInOrder(std::vector<int> insertable)
 	return target_index;
 }
 
-void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
+std::vector<int> PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
 	std::vector<int> insertable;
+	std::vector<int> sorted;
 	size_t first_index_insertable = 0;
 	for (size_t index = 0; index < elements.size(); index++){
 			if(elements.at(index).first == DUMMY_ELEMENT){
@@ -128,17 +207,17 @@ void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
 			}
 			// smaller one of the first pair should locate at the head
 			if (index == first_index_insertable){
-				this->sorted_vector_.push_back(elements.at(index).second);
+				sorted.push_back(elements.at(index).second);
 			} else {
 				insertable.push_back(elements.at(index).second);
 			}
-			this->sorted_vector_.push_back(elements.at(index).first);
+			sorted.push_back(elements.at(index).first);
 	}
-	// add unpaired element to sorted_vector
+	// add unpaired element at the end of insertable
 	if (elements.at(0).first == DUMMY_ELEMENT)
 		insertable.push_back(elements.at(0).second);
 	if (insertable.empty())
-		return ;
+		return sorted;
 	std::vector<int> insert_index_in_order = getInsertIndexInOrder(insertable);
 	int add_count = 0;
 	for (std::vector<int>::iterator index_it = insert_index_in_order.begin();
@@ -146,10 +225,11 @@ void PmergeMe::insertSortVector(std::vector<std::pair<int, int> >&elements){
 	{
 		int target = insertable.at(*index_it - 1);
 		int search_end_index = *index_it + add_count;
-		int insert_index = binarySearch(this->sorted_vector_, target, 0, search_end_index);
-		this->sorted_vector_.insert(this->sorted_vector_.begin() + insert_index, target);
+		int insert_index = binarySearch(sorted, target, 0, search_end_index);
+		sorted.insert(sorted.begin() + insert_index, target);
 		add_count++;
 	}
+	return sorted;
 }
 
 void PmergeMe::execSortVector(int argc, char **argv){
@@ -162,7 +242,10 @@ void PmergeMe::execSortVector(int argc, char **argv){
 	}
 	std::vector<std::pair<int, int> > pair_vector_ = initPairVector();
 	mergeSortVector(pair_vector_, 0, pair_vector_.size() - 1);
-	insertSortVector(pair_vector_);
+	std::vector<std::vector<std::pair<int, int> > > all_vectors;
+	all_vectors.push_back(pair_vector_);
+	mergeInsertVector(pair_vector_, all_vectors);
+	this->sorted_vector_ = insertSortVector(pair_vector_);
 }
 
 void PmergeMe::printVectorInput() const {printElements(this->elements_vector_);}
