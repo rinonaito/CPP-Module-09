@@ -36,45 +36,46 @@ std::vector<std::pair<int, int> > PmergeMe::initPairVector(){
 	return pair_vector_;
 }
 
-void mergeVector(std::vector<std::pair<int, int> >&elements, int start_index, int middle_index, int end_index){
-	std::vector<std::pair<int, int> > devided_left(elements.begin() + start_index, elements.begin() + middle_index + 1);
-	std::vector<std::pair<int, int> > devided_right(elements.begin() + middle_index + 1, elements.begin() + end_index + 1);
-	size_t left_index = 0;
-	size_t right_index = 0;
-	while (left_index < devided_left.size() && right_index < devided_right.size()){
-		 if (devided_left[left_index].first < devided_right[right_index].first){
-			elements[start_index] = devided_left.at(left_index);
-			left_index++;
-		 } else {
-			elements[start_index] = devided_right.at(right_index);
-			right_index++;
-		 }
-		start_index++;
-	}
-	while (left_index < devided_left.size()){
-		elements[start_index] = devided_left.at(left_index);
-		start_index++;
-		left_index++;
-	}
-	while (right_index < devided_right.size()){
-		elements[start_index] = devided_right.at(right_index);
-		start_index++;
-		right_index++;
-	}
-}
-
-void PmergeMe::mergeSortVector(std::vector<std::pair<int, int> >&elements, int start_index, int end_index){
-	if (start_index >= end_index)
-		return;
-	int middle_index = (start_index + end_index) / 2;
-	mergeSortVector(elements, start_index, middle_index);
-	mergeSortVector(elements, middle_index + 1, end_index);
-	mergeVector(elements, start_index, middle_index, end_index);
-}
+//void mergeVector(std::vector<std::pair<int, int> >&elements, int start_index, int middle_index, int end_index){
+//	std::vector<std::pair<int, int> > devided_left(elements.begin() + start_index, elements.begin() + middle_index + 1);
+//	std::vector<std::pair<int, int> > devided_right(elements.begin() + middle_index + 1, elements.begin() + end_index + 1);
+//	size_t left_index = 0;
+//	size_t right_index = 0;
+//	while (left_index < devided_left.size() && right_index < devided_right.size()){
+//		 if (devided_left[left_index].first < devided_right[right_index].first){
+//			elements[start_index] = devided_left.at(left_index);
+//			left_index++;
+//		 } else {
+//			elements[start_index] = devided_right.at(right_index);
+//			right_index++;
+//		 }
+//		start_index++;
+//	}
+//	while (left_index < devided_left.size()){
+//		elements[start_index] = devided_left.at(left_index);
+//		start_index++;
+//		left_index++;
+//	}
+//	while (right_index < devided_right.size()){
+//		elements[start_index] = devided_right.at(right_index);
+//		start_index++;
+//		right_index++;
+//	}
+//}
+//
+//void PmergeMe::mergeSortVector(std::vector<std::pair<int, int> >&elements, int start_index, int end_index){
+//	if (start_index >= end_index)
+//		return;
+//	int middle_index = (start_index + end_index) / 2;
+//	mergeSortVector(elements, start_index, middle_index);
+//	mergeSortVector(elements, middle_index + 1, end_index);
+//	mergeVector(elements, start_index, middle_index, end_index);
+//}
 
 void	PmergeMe::mergeInsertVector(
 			std::vector<std::pair<int, int> >&pair_vector, 
 			std::vector<std::vector<std::pair<int, int> > >& all_vectors){
+	
 	if (pair_vector.size() <= 1)
 		return;
 	std::vector<std::pair<int, int> >for_next_call;
@@ -210,7 +211,7 @@ void PmergeMe::execSortVector(int argc, char **argv){
 		return;
 	}
 	std::vector<std::pair<int, int> > pair_vector_ = initPairVector();
-	mergeSortVector(pair_vector_, 0, pair_vector_.size() - 1);
+	//mergeSortVector(pair_vector_, 0, pair_vector_.size() - 1);
 	std::vector<std::vector<std::pair<int, int> > > all_vectors;
 	all_vectors.push_back(pair_vector_);
 	mergeInsertVector(pair_vector_, all_vectors);
