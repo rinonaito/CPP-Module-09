@@ -101,6 +101,11 @@ void BitcoinExchange::printExchangeResult() const{
 		std::getline(line_stream, price_str);
 		try
 		{
+			if (date[date.size() - 1] != ' '){
+				throw std::runtime_error(ERROR_MSG_BAD_INPUT + date);
+			} else {
+			date.erase(date.size() - 1);
+		}
 			printLine(date, price_str);	
 		}
 		catch(const std::exception& e)

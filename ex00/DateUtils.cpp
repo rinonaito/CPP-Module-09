@@ -8,7 +8,6 @@ bool isLeapYear(int year) {
 bool parseDate(const std::string& dateStr, tm &tm_original) {
 	const std::string ERROR_DATE_NOT_EXIST = "Error: date does not exist.";
 	if (dateStr.size() != 10 || dateStr[4] != '-'|| dateStr[7] != '-'){
-		std::cout <<" errorDateStr :["<< dateStr << "]"<< std::endl;
 		return false;
 	}
 	int year = atoi(dateStr.substr(0, 4).c_str());
