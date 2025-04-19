@@ -91,34 +91,11 @@ void	PmergeMe::mergeInsertVector(
 	}
 	all_vectors.insert(all_vectors.begin(), for_next_call);
 	mergeInsertVector(for_next_call, all_vectors);
-	std::cout << "================================" << std::endl;
-	std::cout << "for all vectors: " << all_vectors.size() << std::endl;
-	for (size_t j = 0; j < all_vectors.size(); j++){
-		std::cout << "vector[" << j << "]" << std::endl;
-		for (size_t i = 0; i < all_vectors[j].size(); i++)
-		{
-			std::cout << " first: " << all_vectors[j][i].first <<
-				" secod: " << all_vectors[j][i].second << std::endl;
-		}
-	}
 	std::vector<std::pair<int, int> > new_element = for_next_call;
 	for (size_t i = 1; i < all_vectors.size(); i++){
-		std::cout << "================================" << std::endl;
-		std::cout << "<< new elements >>" << std::endl;
-		for (size_t i = 0; i < new_element.size(); i++)
-		{
-			std::cout << " first: " << new_element[i].first << " secod: " << new_element[i].second << std::endl;
-		}
 		std::vector<int> sorted = insertSortVector(new_element);
 		new_element.clear();
-		std::cout << "<< sorted >>" << std::endl;
-		printElements(sorted);
 		std::vector<std::pair<int, int> > src = all_vectors[i];
-		std::cout << "<< src >>" << std::endl;
-		for (size_t i = 0; i < src.size(); i++)
-		{
-			std::cout << " first: " << src[i].first << " secod: " << src[i].second << std::endl;
-		}
 		for (size_t i = 0; i < sorted.size(); i++){
 			int first = sorted[i];
 			int second = 0;
@@ -127,27 +104,19 @@ void	PmergeMe::mergeInsertVector(
 					second = src[i].second;
 			}
 			if (second == 0)
-				throw std::runtime_error("SOMETHING WENT WRONG");
+				return ;
 			new_element.push_back(std::make_pair(first, second));
 		}
 		if (src.size() > sorted.size()){
 			new_element.push_back(src[src.size() - 1]);
 		}
-		std::cout << "<< new elements >>" << std::endl;
-		for (size_t i = 0; i < new_element.size(); i++)
-		{
-			std::cout << " first: " << new_element[i].first << " secod: " << new_element[i].second << std::endl;
-		}
 		std::cout << new_element.size() << std::endl;
 		std::cout <<  all_vectors[all_vectors.size() - 1].size() << std::endl;
-		if (new_element.size() == all_vectors[all_vectors.size() - 1].size()){
-			std::cout << "BREAK; " << std::endl;
+		if (new_element.size() == all_vectors[all_vectors.size() - 1].size())
 			break;
-
-		}
 	}
-	std::cout << "HERE" << std::endl;
 	pair_vector = new_element;
+	return;
 }
 
 static int binarySearch(std::vector<int> array, int target, int begin, int end)
