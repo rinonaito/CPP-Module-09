@@ -36,74 +36,55 @@ std::vector<std::pair<int, int> > PmergeMe::initPairVector(){
 	return pair_vector_;
 }
 
-//void mergeVector(std::vector<std::pair<int, int> >&elements, int start_index, int middle_index, int end_index){
-//	std::vector<std::pair<int, int> > devided_left(elements.begin() + start_index, elements.begin() + middle_index + 1);
-//	std::vector<std::pair<int, int> > devided_right(elements.begin() + middle_index + 1, elements.begin() + end_index + 1);
-//	size_t left_index = 0;
-//	size_t right_index = 0;
-//	while (left_index < devided_left.size() && right_index < devided_right.size()){
-//		 if (devided_left[left_index].first < devided_right[right_index].first){
-//			elements[start_index] = devided_left.at(left_index);
-//			left_index++;
-//		 } else {
-//			elements[start_index] = devided_right.at(right_index);
-//			right_index++;
-//		 }
-//		start_index++;
-//	}
-//	while (left_index < devided_left.size()){
-//		elements[start_index] = devided_left.at(left_index);
-//		start_index++;
-//		left_index++;
-//	}
-//	while (right_index < devided_right.size()){
-//		elements[start_index] = devided_right.at(right_index);
-//		start_index++;
-//		right_index++;
-//	}
-//}
-//
-//void PmergeMe::mergeSortVector(std::vector<std::pair<int, int> >&elements, int start_index, int end_index){
-//	if (start_index >= end_index)
-//		return;
-//	int middle_index = (start_index + end_index) / 2;
-//	mergeSortVector(elements, start_index, middle_index);
-//	mergeSortVector(elements, middle_index + 1, end_index);
-//	mergeVector(elements, start_index, middle_index, end_index);
-//}
-
-void	PmergeMe::mergeInsertVector(
+void	PmergeMe::mergeInsertVectorDevide(
 			std::vector<std::pair<int, int> >&pair_vector, 
 			std::vector<std::vector<std::pair<int, int> > >& all_vectors){
 	
 	if (pair_vector.size() <= 1)
 		return;
 	std::vector<std::pair<int, int> >for_next_call;
+	// ペアが作れる限り作る
 	for (size_t i = 0; i + 1 < pair_vector.size(); i += 2){
 		int first = std::max(pair_vector[i].first, pair_vector[i + 1].first);
 		int second = std::min(pair_vector[i].first, pair_vector[i + 1].first);
-		if (first != DUMMY_ELEMENT){
-			for_next_call.push_back(std::make_pair(first, second));
-		} else {
+		for_next_call.push_back(std::make_pair(first, second));
+	}
+	// あまりがある場合、小さい要素の末尾に追加
+	if (pair_vector.size() % 2 != 0){
 			int remaining = pair_vector[pair_vector.size() - 1].first;
-			if (remaining != DUMMY_ELEMENT)
-				for_next_call.push_back(std::make_pair(DUMMY_ELEMENT, remaining));
-		}
+			for_next_call.push_back(std::make_pair(DUMMY_ELEMENT, remaining));
 	}
 	all_vectors.insert(all_vectors.begin(), for_next_call);
-	mergeInsertVector(for_next_call, all_vectors);
-	std::vector<std::pair<int, int> > new_element = for_next_call;
+	//再帰呼び出し
+	mergeInsertVectorDevide(for_next_call, all_vectors);
+	pair_vector = for_next_call;
+}
+
+void	PmergeMe::mergeInsertVectorMerge(
+			std::vector<std::pair<int, int> >&pair_vector, 
+			std::vector<std::vector<std::pair<int, int> > >& all_vectors){
+	std::vector<std::pair<int, int> > new_element = pair_vector;
 	for (size_t i = 1; i < all_vectors.size(); i++){
 		std::vector<int> sorted = insertSortVector(new_element);
 		new_element.clear();
 		std::vector<std::pair<int, int> > src = all_vectors[i];
+		std::cout << "<sorted>" << std::endl;
+		printElements(sorted);
+		std::cout << "<src>" << std::endl;
+		for (size_t i = 0; i < src.size(); i++){
+			std::cout << "[" << i << "] first: " << src[i].first << 
+				", second: " << src[i].second << std::endl;
+		}	
 		for (size_t i = 0; i < sorted.size(); i++){
 			int first = sorted[i];
 			int second = 0;
 			for (size_t j = 0; j < src.size(); j++){
-				if (src[i].first == first)
-					second = src[i].second;
+				if (src[j].first == first){
+					second = src[j].second;
+					break;
+				}
 			}
+			std::cout << "first: " << first << " second: " << second <<  std::endl;
 			if (second == 0)
 				return ;
 			new_element.push_back(std::make_pair(first, second));
@@ -211,10 +192,23 @@ void PmergeMe::execSortVector(int argc, char **argv){
 		return;
 	}
 	std::vector<std::pair<int, int> > pair_vector_ = initPairVector();
-	//mergeSortVector(pair_vector_, 0, pair_vector_.size() - 1);
 	std::vector<std::vector<std::pair<int, int> > > all_vectors;
 	all_vectors.push_back(pair_vector_);
-	mergeInsertVector(pair_vector_, all_vectors);
+	mergeInsertVectorDevide(pair_vector_, all_vectors);
+	std::cout << "***************************************" << std::endl;
+	std::cout << "all" << std::endl;
+	for (size_t j = 0; j < all_vectors.size(); j++){
+		std::cout << "[" << j << "]" << std::endl;
+		for (size_t i = 0; i < all_vectors[j].size(); i++){
+			std::cout << "first: " << all_vectors[j][i].first << " second: " << all_vectors[j][i].second << std::endl;
+		}
+	}
+	std::cout << "############ before finnal insert ################" <<  std::endl;
+	for (size_t i = 0; i < pair_vector_.size(); i++){
+		std::cout << "[" << i << "] first: " << pair_vector_[i].first << 
+			", second: " << pair_vector_[i].second << std::endl;
+	}
+	mergeInsertVectorMerge(pair_vector_, all_vectors);
 	this->sorted_vector_ = insertSortVector(pair_vector_);
 }
 

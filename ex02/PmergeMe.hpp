@@ -26,7 +26,7 @@ class PmergeMe{
 		std::vector<int> getElementsVector() const;
 		std::list<int> getElementsList() const;
 		std::vector<int> getSortedVector() const;
-		std::list<int> getSortedList() const;
+		std::list<int> geintrtedList() const;
 
 	private:
 		//Vector
@@ -34,8 +34,10 @@ class PmergeMe{
 		std::vector<int> sorted_vector_;
 		void initElementsVector(size_t argc, char **argv);
 		std::vector<std::pair<int, int> > initPairVector();
-		//void mergeSortVector(std::vector<std::pair<int, int> >&elements, int start_index, int last_index);
-		void mergeInsertVector(
+		void mergeInsertVectorDevide(
+					std::vector<std::pair<int, int> >&pair_vector, 
+					std::vector<std::vector<std::pair<int, int> > >& all_vectors);
+		void mergeInsertVectorMerge(
 					std::vector<std::pair<int, int> >&pair_vector, 
 					std::vector<std::vector<std::pair<int, int> > >& all_vectors);
 		std::vector<int> insertSortVector(std::vector<std::pair<int, int> >&elements);
