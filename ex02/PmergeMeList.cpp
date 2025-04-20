@@ -12,46 +12,6 @@ void PmergeMe::initElementsList(size_t argc, char **argv){
 	}
 }
 
-void mergeList(std::list<std::pair<int, int> >&elements, int start_index, int middle_index, int end_index){
-
-	std::list<std::pair<int, int> >::iterator start_it = elements.begin();
-	std::advance(start_it, start_index);
-	
-	std::list<std::pair<int, int> >::iterator middle_it = elements.begin();
-	std::advance(middle_it, middle_index + 1);
-	
-	std::list<std::pair<int, int> >::iterator end_it = elements.begin();
-	std::advance(end_it, end_index + 1);
-	
-	std::list<std::pair<int, int> > devided_left(start_it, middle_it);
-	std::list<std::pair<int, int> > devided_right(middle_it, end_it);
-
-	std::list<std::pair<int, int> >::iterator left_it = devided_left.begin();
-	std::list<std::pair<int, int> >::iterator right_it = devided_right.begin();
-	std::list<std::pair<int, int> >::iterator merge_it = start_it;
-	
-	while (left_it != devided_left.end() && right_it != devided_right.end()) {
-		if (left_it->first < right_it->first) {
-			*merge_it = *left_it;
-			left_it++;
-		} else {
-			*merge_it = *right_it;
-			right_it++;
-		}
-		merge_it++;
-	}
-	while (left_it != devided_left.end()) {
-		*merge_it = *left_it;
-		left_it++;
-		merge_it++;
-	}
-	while (right_it != devided_right.end()) {
-		*merge_it = *right_it;
-		right_it++;
-		merge_it++;
-	}
-}
-
 std::list<std::pair<int, int> > PmergeMe::initPairList(){
 	std::list<std::pair<int, int> > pair_list_;
 	std::list<int>::iterator it = elements_list_.begin();
@@ -72,13 +32,81 @@ std::list<std::pair<int, int> > PmergeMe::initPairList(){
 	return pair_list_;
 }
 
-void PmergeMe::mergeSortList(std::list<std::pair<int, int> > &elements, int start_index, int end_index){
-	if (start_index >= end_index)
+void	PmergeMe::mergeInsertListDevide(
+			std::list<std::pair<int, int> >&pair_list, 
+			std::list<std::list<std::pair<int, int> > >& all_lists){
+	
+	if (pair_list.size() <= 1)
 		return;
-	int middle_index = (start_index + end_index) / 2;
-	mergeSortList(elements, start_index, middle_index);
-	mergeSortList(elements, middle_index + 1, end_index);
-	mergeList(elements, start_index, middle_index, end_index);
+	std::list<std::pair<int, int> >for_next_call;
+	// make pairs
+	for (std::list<std::pair<int, int> >::iterator it = pair_list.begin();
+		it != pair_list.end();
+		it++) {
+		int left = it->first;
+		it++;
+		if (it == pair_list.end())
+			break;
+		int right = it->first;
+		int first = std::max(left, right);
+		int second = std::min(left, right);
+		for_next_call.push_back(std::make_pair(first, second));
+	}
+	// if number of element is odd number, make pair with DUMMY
+	if (pair_list.size() % 2 != 0){
+			std::list<std::pair<int, int> >::iterator end_it = pair_list.end();
+			end_it--;
+			int remaining = end_it->first;
+			for_next_call.push_back(std::make_pair(DUMMY_ELEMENT, remaining));
+	}
+	all_lists.insert(all_lists.begin(), for_next_call);
+	// call the function recursively
+	mergeInsertListDevide(for_next_call, all_lists);
+	pair_list = for_next_call;
+}
+
+void	PmergeMe::mergeInsertListMerge(
+			std::list<std::pair<int, int> >&pair_list, 
+			std::list<std::list<std::pair<int, int> > >& all_lists){
+	std::list<std::pair<int, int> > new_element = pair_list;
+	//for (size_t i = 1; i < all_lists.size(); i++){
+	std::list<std::list<std::pair<int, int> > >::iterator it_out = all_lists.begin();
+	it_out++;
+	while (it_out != all_lists.end()){
+		std::list<int> sorted = insertSortList(new_element);
+		new_element.clear();
+		std::list<std::pair<int, int> > src = *it_out;
+		//for (size_t i = 0; i < sorted.size(); i++){
+		for (std::list<int>::iterator it_on_sorted = sorted.begin();
+			it_on_sorted != sorted.end(); it_on_sorted++){
+			int first = *it_on_sorted;
+			int second = 0;
+			//for (size_t j = 0; j < src.size(); j++){
+			for (std::list<std::pair<int, int> >::iterator it_on_src = src.begin();
+				it_on_src != src.end();
+				it_on_src++) {
+				if (it_on_src->first == first){
+					second = it_on_src->second;
+					break;
+				}
+			}
+			if (second == 0)
+				return ;
+			new_element.push_back(std::make_pair(first, second));
+		}
+		if (src.size() > sorted.size()){
+			std::list<std::pair<int, int> >::iterator it = src.end();
+			it--;
+			new_element.push_back(*it);
+		}
+		std::list<std::list<std::pair<int, int> > >::iterator it = all_lists.end();
+		it++;
+		if (new_element.size() == it->size())
+			break;
+		it_out++;
+	}
+	pair_list = new_element;
+	return;
 }
 
 static int binarySearch(const std::list<int>& array, int target, int begin, int end)
@@ -127,8 +155,9 @@ static std::list<int> getInsertIndexInOrder(std::list<int> insertable)
 	return target_index;
 }
 
-void PmergeMe::insertSortList(std::list<std::pair<int, int> >& elements) {
+std::list<int> PmergeMe::insertSortList(std::list<std::pair<int, int> >&elements){
 	std::list<int> insertable;
+	std::list<int> sorted;
 	size_t first_index_insertable = 0;
 	
 	size_t index = 0;
@@ -139,18 +168,18 @@ void PmergeMe::insertSortList(std::list<std::pair<int, int> >& elements) {
 		}
 		// smaller one of the first pair should locate at the head
 		if (index == first_index_insertable) {
-			this->sorted_list_.push_back(it->second);
+			sorted.push_back(it->second);
 		} else {
 			insertable.push_back(it->second);
 		}
-		this->sorted_list_.push_back(it->first);
+		sorted.push_back(it->first);
 	}
-	// add unpaired element to sorted vector
+	// add unpaired element to sorted list
 	if (first_index_insertable == 1) {
 		insertable.push_back(elements.front().second);
 	}
 	if (insertable.empty())
-		return;
+		return sorted;
 	std::list<int> insert_index_in_order = getInsertIndexInOrder(insertable);
 	int add_count = 0;
 	for (std::list<int>::iterator index_it = insert_index_in_order.begin(); index_it != insert_index_in_order.end(); index_it++) {
@@ -159,12 +188,13 @@ void PmergeMe::insertSortList(std::list<std::pair<int, int> >& elements) {
 		std::advance(insertable_it, index);
 		int target = *insertable_it;
 		int search_end_index = *index_it + add_count;
-		int insert_index = binarySearch(this->sorted_list_, target, 0, search_end_index);
-		std::list<int>::iterator insert_pos = this->sorted_list_.begin();
+		int insert_index = binarySearch(sorted, target, 0, search_end_index);
+		std::list<int>::iterator insert_pos = sorted.begin();
 		std::advance(insert_pos, insert_index);
-		this->sorted_list_.insert(insert_pos, target);
+		sorted.insert(insert_pos, target);
 		add_count++;
 	}
+	return sorted;
 }
 
 void PmergeMe::execSortList(int argc, char **argv){
@@ -175,9 +205,12 @@ void PmergeMe::execSortList(int argc, char **argv){
 		this->sorted_list_ = this->elements_list_;
 		return;
 	}
-	std::list<std::pair<int, int> > pair_list_ = initPairList();
-	mergeSortList(pair_list_, 0, pair_list_.size() - 1);
-	insertSortList(pair_list_);
+	std::list<std::pair<int, int> > pair_list = initPairList();
+	std::list<std::list<std::pair<int, int> > > all_lists;
+	all_lists.push_back(pair_list);
+	mergeInsertListDevide(pair_list, all_lists);
+	mergeInsertListMerge(pair_list, all_lists);
+	this->sorted_list_ = insertSortList(pair_list);
 }
 
 void PmergeMe::printListInput() const {printElements(this->elements_list_);}

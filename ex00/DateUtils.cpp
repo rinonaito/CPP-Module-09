@@ -28,7 +28,9 @@ bool parseDate(const std::string& dateStr, tm &tm_original) {
 }
 
 std::string formatDate(const tm& tm) {
-	char buffer[11];
-	snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-	return std::string(buffer);
+    std::ostringstream oss;
+    oss << std::setfill('0') << std::setw(4) << (tm.tm_year + 1900) << '-'
+        << std::setw(2) << (tm.tm_mon + 1) << '-'
+        << std::setw(2) << tm.tm_mday;
+    return oss.str();
 }

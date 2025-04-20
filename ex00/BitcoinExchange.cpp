@@ -83,7 +83,7 @@ void BitcoinExchange::printLine(const std::string date, const std::string price_
 	std::map<std::string, float>::const_iterator rate_it = this->rate_db_.find(date);
 	if (rate_it == this->rate_db_.end())
 		rate_it = findClosestDate(date);
-	std::cout << date << "=> " << price << " = "<< price * rate_it->second << std::endl;
+	std::cout << date << " => " << price << " = "<< price * rate_it->second << std::endl;
 }
 
 void BitcoinExchange::printExchangeResult() const{
